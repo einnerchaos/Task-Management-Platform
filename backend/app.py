@@ -476,7 +476,10 @@ def create_sample_data():
             ))
     db.session.commit()
 
-if __name__ == '__main__':
+# Global flag to track initialization
+_initialized = False
+
+def initialize_database():
     with app.app_context():
         db.create_all()
         # Always check and seed if empty
@@ -485,4 +488,14 @@ if __name__ == '__main__':
             create_sample_data()
         else:
             print('Sample data already present, skipping seeding.')
+
+@app.before_request
+def ensure_initialized():
+    global _initialized
+    if not _initialized:
+        initialize_database()
+        _initialized = True
+
+if __name__ == '__main__':
+    initialize_database()
     socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True) 
